@@ -27,6 +27,11 @@ spec:
     metrics:
       enabled: true
     name: QM1
+    mqsc:
+      - configMap:
+          name: mqsc-configmap
+          items:
+            - static-generic.mqsc
     readinessProbe:
       failureThreshold: 1
       initialDelaySeconds: 10
