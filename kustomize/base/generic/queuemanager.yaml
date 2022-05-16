@@ -46,11 +46,6 @@ spec:
 
     image: "replace"
     imagePullPolicy: Always
-    mqsc:
-    - configMap:
-        name: mqsc-configmap
-        items:
-        - config.mqsc
 
     storage:
       persistedData:
