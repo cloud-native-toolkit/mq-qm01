@@ -44,7 +44,7 @@ spec:
     availability:
       type: SingleInstance
 
-    image: "image-registry.openshift-image-registry.svc:5000/ci/mq-infra:0.0.1"
+    image: "replace"
     imagePullPolicy: Always
     mqsc:
     - configMap:
