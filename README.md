@@ -106,3 +106,5 @@ If you want to enable the queuemanager to use native high avaibility capability,
 
 - A Native HA configuration provides a highly available queue manager where the recoverable MQ data (for example, the messages)  are replicated across multiple sets of storage, preventing loss from storage failures.
 - This is suitable for use with cloud block storage.
+
+
