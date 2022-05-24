@@ -1,4 +1,4 @@
-# mq-infra
+# mq-qm01
 
 This project contains necessary artifacts for deploying queuemanager on Openshift.
 
@@ -10,32 +10,39 @@ This project contains necessary artifacts for deploying queuemanager on Openshif
 
 ## Introduction
 
-This guide provides a walkthrough on how to set up an Queuemanager.  The Github repository is a template containing a Dockerfile and Helm Chart which is used with the [Cloud Native Toolkit](https://cloudnativetoolkit.dev/) to register a Tekton pipeline to build a Queuemanager image and deploy it on a containerized instance of IBM MQ.
+This guide provides a walkthrough on how to set up an Queuemanager.  The Github repository is a template containing a Dockerfile and Kustomize resources which is used with the [Cloud Native Toolkit](https://cloudnativetoolkit.dev/) to register a Tekton pipeline to build a Queuemanager image and deploy it on a containerized instance of IBM MQ. Optionally, it also contains a Helm chart which can be used by the developer to deploy the queuemanager using Helm.
 
 This repo contains the below artifacts.
-
 
 ```
 .
 ├── Dockerfile
 ├── README.md
-└── chart
+├── chart
+│   └── base
+│       ├── Chart.yaml
+│       ├── config
+│       │   └── config.mqsc
+│       ├── security
+│       │   └── config.mqsc
+│       ├── templates
+│       │   ├── NOTES.txt
+│       │   ├── _helpers.tpl
+│       │   ├── configmap.yaml
+│       │   └── qm-template.yaml
+│       └── values.yaml
+└── kustomize
     └── base
-        ├── Chart.yaml
-        ├── config
-        │   └── config.mqsc
-        ├── security
-        │   └── config.mqsc
-        ├── templates
-        │   ├── NOTES.txt
-        │   ├── _helpers.tpl
-        │   ├── configmap.yaml
-        │   └── qm-template.yaml
-        └── values.yaml
+        ├── generic-qmgr
+        │   ├── kustomization.yaml
+        │   ├── queuemanager.yaml
+        │   └── static-definitions.mqsc
+        └── native-ha-qmgr
 ```
 
 - `ibm-mqadvanced-server-integration` docker image that comes with CloudPaks. This image can be further customized if we need additional configurations that are part of queuemanager.
 - `Helm Charts` - Currently, we are using quickstart template as our base and building additional things on top of it for deploying the queuemanager.
+- `Kustomize` - Currently, kustomize folder includes two variants of queuemanager, one is using the basic template and the other is using the native-ha template. Using these bases, additonal things are built on top of them for deploying the desired queuemanager.
 - `Configurations` - Like mentioned earlier, the configurations can be embedded as part of Dockerfile. Alternatively, they can also be injected as configmaps.
 
 ## Pre-requisites
@@ -45,6 +52,25 @@ This repo contains the below artifacts.
 - [IBM MQ Operator](https://www.ibm.com/docs/en/ibm-mq/9.2?topic=integration-using-mq-in-cloud-pak-openshift)
 
 ## Queuemanager Details
+
+### Kustomize
+
+- `generic-qmgr` contains the basic queuemanager resources. In this, security and native HA are disabled.
+- To enable high availability, use the queuemanager resources from `native-ha-qmgr`.
+- Similarly, we can defined different variants of queuemanager under the `base` based on our requirements. For instance, we can enable the security on top of the basic template and create resources for generic queuemanager with security turned on and place it in a folder named `generic-qmgr-with-security` under base.
+
+Note: This project demonstrates how to add in the `mqsc` configuration files. Similarly, if you want to configure an `static-definitions.ini`, please create an `ini` file for the same and inject it under `configMapGenerator` in the `kustomization.yaml` using the below snippet.
+
+```yaml
+configMapGenerator:
+# Create an MQSC configMap using generic MQSC which will be added to all queue managers and applied during bootstrap.
+- name: ini-configmap
+  behavior: create
+  files:
+  - static-definitions.ini
+```
+
+### Helm Chart
 
 - Intially, security and native HA are disabled.
 - To enable security, set `security` to true in `Values.yaml`.
@@ -68,7 +94,7 @@ ini:
 
 ## Enable Security
 
-If you want to enable the queuemanager to use security, we need to set the `security` flag to `true` in `Values.yaml`. By default, it is always `false`.
+If you want to enable the queuemanager to use security, we need to set the `security` flag to `true` in `Values.yaml` if using Helm. By default, it is always `false`. If you are using kustomize, use the flavor of queuemanager where security is enabled.
 
 ### Configuration
 
@@ -102,9 +128,7 @@ If you want to enable the queuemanager to use security, we need to set the `secu
 
 ## Enable Native HA
 
-If you want to enable the queuemanager to use native high avaibility capability, we need to set the `ha` flag to `true` in `Values.yaml`. By default, it is always `false`.
+If you want to enable the queuemanager to use native high avaibility capability, we need to set the `ha` flag to `true` in `Values.yaml` if using Helm. By default, it is always `false`. If you are using kustomize, use the flavor of queuemanager where native ha is enabled.
 
 - A Native HA configuration provides a highly available queue manager where the recoverable MQ data (for example, the messages)  are replicated across multiple sets of storage, preventing loss from storage failures.
 - This is suitable for use with cloud block storage.
-
-
