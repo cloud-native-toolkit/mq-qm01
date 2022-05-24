@@ -31,7 +31,7 @@ spec:
       - configMap:
           name: mqsc-configmap
           items:
-            - static-generic.mqsc
+            - static-definitions.mqsc
     readinessProbe:
       failureThreshold: 1
       initialDelaySeconds: 10

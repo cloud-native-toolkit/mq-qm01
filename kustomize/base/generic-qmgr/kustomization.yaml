@@ -9,4 +9,4 @@ configMapGenerator:
 - name: mqsc-configmap
   behavior: create
   files:
-  - static-generic.mqsc
+  - static-definitions.mqsc
