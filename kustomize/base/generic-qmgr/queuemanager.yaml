@@ -1,5 +1,3 @@
----
-# Source: mq-infra/templates/qm-template.yaml
 apiVersion: mq.ibm.com/v1beta1
 kind: QueueManager
 metadata:
