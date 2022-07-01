@@ -6,7 +6,6 @@ generatorOptions:
 
 # Create a configMap that will be used with a volume that is dynamically updated.
 configMapGenerator:
-
 - name: dynamic-mqsc-configmap
   behavior: create
   files:

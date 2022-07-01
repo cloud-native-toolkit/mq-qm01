@@ -17,7 +17,6 @@ spec:
           configMap:
             name: dynamic-mqsc-configmap
             defaultMode: 0777
-
       containers:
         - env:
             - name: MQSNOAUT

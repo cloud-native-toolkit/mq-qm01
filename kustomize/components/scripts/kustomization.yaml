@@ -1,4 +1,4 @@
-apiVersion: kustomize.config.k8s.io/v1alpha1
+apiVersion: kustomize.config.k8s.io/v1alpha1  
 kind: Component
 
 generatorOptions:
@@ -6,7 +6,6 @@ generatorOptions:
 
 # Create a configMap that holds scripts for the queue manager service.
 configMapGenerator:
-
 - name: scripts-configmap
   behavior: create
   files:
