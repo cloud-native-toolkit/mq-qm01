@@ -32,12 +32,22 @@ This repo contains the below artifacts.
 │       │   └── qm-template.yaml
 │       └── values.yaml
 └── kustomize
-    └── base
-        ├── generic-qmgr
-        │   ├── kustomization.yaml
-        │   ├── queuemanager.yaml
-        │   └── static-definitions.mqsc
-        └── native-ha-qmgr
+    ├── base
+    │   ├── generic-qmgr
+    │   │   ├── kustomization.yaml
+    │   │   ├── queuemanager.yaml
+    │   │   └── static-definitions.mqsc
+    │   └── native-ha-qmgr
+    └── components
+        ├── dynamic-mqsc
+        │   └── generic-qmgr
+        │       ├── dynamic-definitions.mqsc
+        │       ├── kustomization.yaml
+        │       └── queuemanager.yaml
+        └── scripts
+            ├── kustomization.yaml
+            ├── start-mqsc.sh
+            └── stop-mqsc.sh
 ```
 
 - `ibm-mqadvanced-server-integration` docker image that comes with CloudPaks. This image can be further customized if we need additional configurations that are part of queuemanager.
@@ -68,6 +78,36 @@ configMapGenerator:
   behavior: create
   files:
   - static-definitions.ini
+```
+
+#### Static Configurations
+
+By default, this queuemanager will use the `static-definitions.mqsc` to populate the necessary configurations. Whenever, there is a change in the configuration, the queuemanager should be restarted to enable the changes.
+
+#### Dynamic Configurations
+
+To avoid the downtime, we can alternatively use the `dynamic-definitions.mqsc` to populate the necessary configurations. This doesn't need the queuemanager restart and the changes will be automatically picked up.
+
+For this functionality, we used kustomize `components` to generate the dynamic definitions. If you want to use this option, modify the `kustomize/base/generic-qmgr/kustomization.yaml` by uncommenting the components section as follows.
+
+```
+resources:
+- ./queuemanager.yaml
+
+generatorOptions:
+ disableNameSuffixHash: true
+# We use a configMapGenerator because it allows us to build up the mqsc from regular MQSC files.
+configMapGenerator:
+# Create an MQSC configMap using generic MQSC which will be added to all queue managers and applied during bootstrap.
+- name: mqsc-configmap
+  behavior: create
+  files:
+  - static-definitions.mqsc
+
+# Add the configMap that will be used for dynamic updates, this should be used queue manager wide i.e. stay the same in each environment.
+components:
+- ../../components/dynamic-mqsc/generic-qmgr
+- ../../components/scripts
 ```
 
 ### Helm Chart
