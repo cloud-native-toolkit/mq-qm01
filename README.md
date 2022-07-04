@@ -67,7 +67,7 @@ This repo contains the below artifacts.
 
 - `generic-qmgr` contains the basic queuemanager resources. In this, security and native HA are disabled.
 - To enable high availability, use the queuemanager resources from `native-ha-qmgr`.
-- Similarly, we can defined different variants of queuemanager under the `base` based on our requirements. For instance, we can enable the security on top of the basic template and create resources for generic queuemanager with security turned on and place it in a folder named `generic-qmgr-with-security` under base.
+- Similarly, we can define different variants of queuemanager under the `base` based on our requirements. For instance, we can enable the security on top of the basic template and create resources for generic queuemanager with security turned on and place it in a folder named `generic-qmgr-with-security` under base.
 
 Note: This project demonstrates how to add in the `mqsc` configuration files. Similarly, if you want to configure an `static-definitions.ini`, please create an `ini` file for the same and inject it under `configMapGenerator` in the `kustomization.yaml` using the below snippet.
 
