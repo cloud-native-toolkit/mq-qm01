@@ -32,12 +32,22 @@ This repo contains the below artifacts.
 │       │   └── qm-template.yaml
 │       └── values.yaml
 └── kustomize
-    └── base
-        ├── generic-qmgr
-        │   ├── kustomization.yaml
-        │   ├── queuemanager.yaml
-        │   └── static-definitions.mqsc
-        └── native-ha-qmgr
+    ├── base
+    │   ├── generic-qmgr
+    │   │   ├── kustomization.yaml
+    │   │   ├── queuemanager.yaml
+    │   │   └── static-definitions.mqsc
+    │   └── native-ha-qmgr
+    └── components
+        ├── dynamic-mqsc
+        │   └── generic-qmgr
+        │       ├── dynamic-definitions.mqsc
+        │       ├── kustomization.yaml
+        │       └── queuemanager.yaml
+        └── scripts
+            ├── kustomization.yaml
+            ├── start-mqsc.sh
+            └── stop-mqsc.sh
 ```
 
 - `ibm-mqadvanced-server-integration` docker image that comes with CloudPaks. This image can be further customized if we need additional configurations that are part of queuemanager.
@@ -57,7 +67,7 @@ This repo contains the below artifacts.
 
 - `generic-qmgr` contains the basic queuemanager resources. In this, security and native HA are disabled.
 - To enable high availability, use the queuemanager resources from `native-ha-qmgr`.
-- Similarly, we can defined different variants of queuemanager under the `base` based on our requirements. For instance, we can enable the security on top of the basic template and create resources for generic queuemanager with security turned on and place it in a folder named `generic-qmgr-with-security` under base.
+- Similarly, we can define different variants of queuemanager under the `base` based on our requirements. For instance, we can enable the security on top of the basic template and create resources for generic queuemanager with security turned on and place it in a folder named `generic-qmgr-with-security` under base.
 
 Note: This project demonstrates how to add in the `mqsc` configuration files. Similarly, if you want to configure an `static-definitions.ini`, please create an `ini` file for the same and inject it under `configMapGenerator` in the `kustomization.yaml` using the below snippet.
 
@@ -68,6 +78,36 @@ configMapGenerator:
   behavior: create
   files:
   - static-definitions.ini
+```
+
+#### Static Configurations
+
+By default, this queuemanager will use the `static-definitions.mqsc` to populate the necessary configurations. Whenever, there is a change in the configuration, the queuemanager should be restarted to enable the changes.
+
+#### Dynamic Configurations
+
+To avoid the downtime, we can alternatively use the `dynamic-definitions.mqsc` to populate the necessary configurations. This doesn't need the queuemanager restart and the changes will be automatically picked up.
+
+For this functionality, we used kustomize `components` to generate the dynamic definitions. If you want to use this option, modify the `kustomize/base/generic-qmgr/kustomization.yaml` by uncommenting the components section as follows.
+
+```
+resources:
+- ./queuemanager.yaml
+
+generatorOptions:
+ disableNameSuffixHash: true
+# We use a configMapGenerator because it allows us to build up the mqsc from regular MQSC files.
+configMapGenerator:
+# Create an MQSC configMap using generic MQSC which will be added to all queue managers and applied during bootstrap.
+- name: mqsc-configmap
+  behavior: create
+  files:
+  - static-definitions.mqsc
+
+# Add the configMap that will be used for dynamic updates, this should be used queue manager wide i.e. stay the same in each environment.
+components:
+- ../../components/dynamic-mqsc/generic-qmgr
+- ../../components/scripts
 ```
 
 ### Helm Chart
