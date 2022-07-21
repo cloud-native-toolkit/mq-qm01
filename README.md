@@ -82,33 +82,13 @@ configMapGenerator:
 
 #### Static Configurations
 
-By default, this queuemanager will use the `static-definitions.mqsc` to populate the necessary configurations. Whenever, there is a change in the configuration, the queuemanager should be restarted to enable the changes.
+This queuemanager will use the `static-definitions.mqsc` to populate the necessary configurations. Whenever, there is a change in the configuration, the queuemanager should be restarted to enable the changes.
 
 #### Dynamic Configurations
 
 To avoid the downtime, we can alternatively use the `dynamic-definitions.mqsc` to populate the necessary configurations. This doesn't need the queuemanager restart and the changes will be automatically picked up.
 
-For this functionality, we used kustomize `components` to generate the dynamic definitions. If you want to use this option, modify the `kustomize/base/generic-qmgr/kustomization.yaml` by uncommenting the components section as follows.
-
-```
-resources:
-- ./queuemanager.yaml
-
-generatorOptions:
- disableNameSuffixHash: true
-# We use a configMapGenerator because it allows us to build up the mqsc from regular MQSC files.
-configMapGenerator:
-# Create an MQSC configMap using generic MQSC which will be added to all queue managers and applied during bootstrap.
-- name: mqsc-configmap
-  behavior: create
-  files:
-  - static-definitions.mqsc
-
-# Add the configMap that will be used for dynamic updates, this should be used queue manager wide i.e. stay the same in each environment.
-components:
-- ../../components/dynamic-mqsc/generic-qmgr
-- ../../components/scripts
-```
+For this functionality, we used kustomize `components` to generate the dynamic definitions. By default, these configurations are in place.
 
 ### Helm Chart
 
